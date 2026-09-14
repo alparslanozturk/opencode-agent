@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "autoupdate": false,
+  "model": "kurum/qwen3.6-35b-a3b",
+  "provider": {
+    "kurum": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Kurum Qwen (iç ağ)",
+      "options": {
+        "baseURL": "http://KURUM_ENDPOINT:PORT/v1",
+        "apiKey": "kurum-anahtari",
+        "timeout": 900000,
+        "headerTimeout": 300000,
+        "chunkTimeout": 180000
+      },
+      "models": {
+        "qwen3.6-35b-a3b": {
+          "id": "/data/models--Qwen--Qwen36-35B-A3B-FP8",
+          "name": "Qwen3.6-35B-A3B-FP8 (kurum)",
+          "tool_call": true,
+          "reasoning": false,
+          "attachment": false,
+          "limit": {
+            "context": 16384,
+            "output": 4096
+          }
+        }
+      }
+    }
+  },
+  "permission": {
+    "skill": {
+      "*": "allow"
+    },
+    "bash": {
+      "*": "ask",
+      "rm -rf *": "deny",
+      "rm -rf /*": "deny",
+      "mkfs*": "deny",
+      "git push --force*": "deny"
+    },
+    "edit": "allow",
+    "read": "allow",
+    "grep": "allow",
+    "glob": "allow",
+    "list": "allow",
+    "external_directory": "ask"
+  }
+}

@@ -1,0 +1,21 @@
+# --- büyük ikili / dağıtım arşivi (paketle ayrı taşınır) ---
+bin/
+*.tar.gz
+
+# --- sırlar / ortam (repoya GİRMEZ) ---
+env
+.env
+*.key
+*.pem
+
+# --- opencode / plugin çalışma zamanı ---
+node_modules/
+package-lock.json
+bun.lock
+.cache/
+
+# --- geçici ---
+__pycache__/
+*.pyc
+*.log
+*.tmp
