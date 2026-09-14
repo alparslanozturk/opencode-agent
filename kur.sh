@@ -9,8 +9,22 @@
 # =============================================================================
 set -euo pipefail
 KOK="$(cd "$(dirname "$0")" && pwd)"
+if [ ! -f "$KOK/env" ]; then
+  echo "!! $KOK/env bulunamadi." >&2
+  echo "   Sablondan olustur ve 3 satiri doldur:" >&2
+  echo "     cp $KOK/env.example $KOK/env && vi $KOK/env" >&2
+  echo "   (env bilerek git'te degil: URL + anahtar repoda durmasin.)" >&2
+  exit 1
+fi
 # shellcheck disable=SC1090
 . "$KOK/env"
+
+if [ ! -f "$KOK/bin/opencode" ]; then
+  echo "!! $KOK/bin/opencode yok — ikili git'te degil (bilerek)." >&2
+  echo "   Cozum: paketten kopyala      tar xJf opencode-paket.tar.xz -C /root" >&2
+  echo "      ya da kurumda kurulu opencode ikilisini $KOK/bin/opencode olarak koy." >&2
+  exit 1
+fi
 
 BAGLANTI_YOK=0
 BAGLANTI_ZORLA=0

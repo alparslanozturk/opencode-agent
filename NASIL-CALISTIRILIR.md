@@ -22,6 +22,15 @@ vi /root/opencode-alp/env                    # KURUM_URL=http://sunucu:port/v1 (
 cd /root/work/aider   # hangi dizinde çalışacaksan orada aç
 opencode              # kısa ad: oc
 ```
+**git ile çektiysen** (paket yerine `git pull` ile kuruyorsan):
+```bash
+cd /root/ai/opencode-agent   # repo nerede ise
+cp env.example env && vi env # 3 satırı doldur
+./kur.sh
+```
+> ⚠️ `env` ve `bin/opencode` **bilerek git'te yoktur** (anahtar + 177 MB ikili).
+> `env`: `env.example`'dan kopyala · `bin/opencode`: paketten ya da kurumda kurulu opencode ikilisinden koy.
+
 İlk açılışta **`/models`** → `kurum / Qwen3.6-35B-A3B-FP8` seç (bir kez; sonra hatırlar).
 
 **Doğrulama** (istediğin zaman tekrar çalıştırılabilir, internet gerektirmez):
