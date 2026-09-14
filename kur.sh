@@ -11,8 +11,15 @@ set -euo pipefail
 KOK="$(cd "$(dirname "$0")" && pwd)"
 if [ ! -f "$KOK/env" ]; then
   echo "!! $KOK/env bulunamadi." >&2
-  echo "   Sablondan olustur ve 3 satiri doldur:" >&2
-  echo "     cp $KOK/env.example $KOK/env && vi $KOK/env" >&2
+  echo "   Olustur ve 3 satiri doldur:" >&2
+  if [ -f "$KOK/env.example" ]; then
+    echo "     cp $KOK/env.example $KOK/env && vi $KOK/env" >&2
+  else
+    echo "     Su 3 satirla olustur (degerleri kurumdan al):" >&2
+    echo "       KURUM_URL=http://<endpoint>:<port>/v1" >&2
+    echo "       KURUM_KEY=dummy" >&2
+    echo "       MODEL_ID=/data/models--Qwen--Qwen36-35B-A3B-FP8" >&2
+  fi
   echo "   (env bilerek git'te degil: URL + anahtar repoda durmasin.)" >&2
   exit 1
 fi

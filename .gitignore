@@ -4,6 +4,7 @@ bin/
 
 # --- sırlar / ortam (repoya GİRMEZ) ---
 env
+env.example
 .env
 *.key
 *.pem

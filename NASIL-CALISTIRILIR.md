@@ -25,11 +25,11 @@ opencode              # kısa ad: oc
 **git ile çektiysen** (paket yerine `git pull` ile kuruyorsan):
 ```bash
 cd /root/ai/opencode-agent   # repo nerede ise
-cp env.example env && vi env # 3 satırı doldur
+cp env.example env 2>/dev/null || vi env   # env oluştur + 3 satırı doldur
 ./kur.sh
 ```
-> ⚠️ `env` ve `bin/opencode` **bilerek git'te yoktur** (anahtar + 177 MB ikili).
-> `env`: `env.example`'dan kopyala · `bin/opencode`: paketten ya da kurumda kurulu opencode ikilisinden koy.
+> ⚠️ `env`, `env.example` ve `bin/opencode` **bilerek git'te yoktur** (kurum adresi/anahtar + 177 MB ikili).
+> Eksikse `kur.sh` ne yazacağını ekrana basar.
 
 İlk açılışta **`/models`** → `kurum / Qwen3.6-35B-A3B-FP8` seç (bir kez; sonra hatırlar).
 
