@@ -12,7 +12,7 @@
 
 ```bash
 # 1) paketi getir ve 3 satırı doldur
-tar xzf opencode-paket.tar.gz -C /root      # -> /root/opencode-alp/
+tar xJf opencode-paket.tar.xz -C /root      # -> /root/opencode-alp/   (.tar.gz ise: tar xzf ...)
 vi /root/opencode-alp/env                    # KURUM_URL=http://sunucu:port/v1 (+ KURUM_KEY, MODEL_ID)
 
 # 2) kur (offline; ikili + ayar + 38 beceri + oc/opencode kısayolları kurulur, sonda otomatik doğrulama çalışır)
