@@ -1,0 +1,3 @@
+KURUM_URL=https://runai.gpudtx.kuveytturk.com.tr/inference/qwen36-35b-a3b-fp8/v1
+KURUM_KEY=dummy
+MODEL_ID=/data/models--Qwen--Qwen36-35B-A3B-FP8
