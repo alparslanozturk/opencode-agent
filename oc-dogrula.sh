@@ -96,11 +96,11 @@ else
 fi
 
 eksik=""
-for d in skills/approved skills/experimental skills/generated runbooks incidents lessons-learned operations-notes architecture roadmap; do
+for d in skills/approved skills/experimental skills/generated runbooks incidents lessons-learned operations-notes architecture roadmap policy; do
   [ -d "$KOK/knowledge/$d" ] || eksik="$eksik $d"
 done
 if [ -z "$eksik" ]; then
-  ok "knowledge iskeleti tam (9 dizin)"
+  ok "knowledge iskeleti tam (10 dizin)"
 else
   hata "knowledge/ altinda eksik dizin:$eksik"
 fi

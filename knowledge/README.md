@@ -13,7 +13,8 @@ Bu dizin **motor değil, hafızadır**. Motor (opencode + Qwen) değişebilir; b
 | `incidents/` | Gerçek olay kayıtları (ne oldu, kök neden, çözüm) | `2026-09-14-....md` |
 | `lessons-learned/` | Görev sonu öneri kayıtları (ajan yazar, insan onaylar) | `2026-09-14-....yaml` |
 | `operations-notes/` | Gündelik operasyon notları, ortam künyeleri | `envanter-kaynaklari.md` |
-| `architecture/` | Mimari anlatım + kararlar (ADR) | `decisions/0001-....md` |
+| `architecture/` | Mimari anlatım + kararlar (ADR) + danışma kayıtları | `decisions/0001-....md` |
+| `policy/` | Politika belgeleri: tehdit modeli, izin matrisi, audit formatı | `PERMISSION-MATRIX.md` |
 | `roadmap/` | Backlog · planlanan özellikler · fikirler · haftalık raporlar | `backlog.md` |
 
 ## Beceri yaşam döngüsü (onay kapısı)
@@ -33,6 +34,7 @@ Bu dizin **motor değil, hafızadır**. Motor (opencode + Qwen) değişebilir; b
 | İnsan (Alp) | `incidents/`, `operations-notes/`, `runbooks/` | olay sonrası / elle |
 | İnsan (Alp) | `experimental` → `approved` taşıma (onay) | öneri incelendikten sonra |
 | Doktor/Patron | `roadmap/reports/haftalik-*.md` | haftalık |
+| Doktor/Patron | `policy/`, `architecture/decisions/` | mimari karar anında |
 
 ## Sürüm kontrolü
 Bu depo git'tir: her bilgi değişikliği izlenir, geri alınabilir.
