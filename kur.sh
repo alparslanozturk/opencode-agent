@@ -26,9 +26,14 @@ fi
 # shellcheck disable=SC1090
 . "$KOK/env"
 
+if [ ! -x "$KOK/bin/opencode" ] && [ -f "$KOK/bin/opencode.tar.xz" ]; then
+  echo ">> bin/opencode yok — bin/opencode.tar.xz aciliyor (bir kez)..."
+  tar xJf "$KOK/bin/opencode.tar.xz" -C "$KOK/bin" && chmod +x "$KOK/bin/opencode"
+fi
+
 if [ ! -f "$KOK/bin/opencode" ]; then
-  echo "!! $KOK/bin/opencode yok — ikili git'te degil (bilerek)." >&2
-  echo "   Cozum: paketten kopyala      tar xJf opencode-paket.tar.xz -C /root" >&2
+  echo "!! $KOK/bin/opencode yok." >&2
+  echo "   Cozum: git ile gelen bin/opencode.tar.xz'yi ac  ->  tar xJf $KOK/bin/opencode.tar.xz -C $KOK/bin" >&2
   echo "      ya da kurumda kurulu opencode ikilisini $KOK/bin/opencode olarak koy." >&2
   exit 1
 fi
