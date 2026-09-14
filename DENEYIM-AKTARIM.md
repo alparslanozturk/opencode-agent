@@ -31,3 +31,15 @@ opencode zaten OpenAI uyumlu konuşuyor; kurum ucu da OpenAI uyumlu → aradan �
 1. hedef makinede `./kur.sh && opencode` → aynı 3 görevi koştur, **fork ile kıyasla**: doğru cevap · süre · token · gereksiz araç çağrısı.
 2. Sonuç iyiyse: yukarıdaki "açık kalanlar" listesinden hangisi canımızı yakıyorsa **plugin** yazarız.
 3. Plugin de yetmezse (UI paritesi) → fork'a kod. **Not: çeviri/Türkçeleştirme iş kalemi DEĞİL (Alp, 16:44).**
+
+## 2026-09-14 — Bilgi katmanı ayrıldı (`knowledge/`)
+
+Motor ile bilgi ayrıldı: `engine/` = opencode ayarı/kuralı (güncellenebilir), `knowledge/` = git tabanlı bilgi deposu (kalıcı).
+Aider'daki "beceri kütüphanesi" fikri genişletildi:
+
+| Aider'da | opencode'da (bu depo) |
+|---|---|
+| `aider/beceriler/*/SKILL.md` | `knowledge/skills/approved/*/SKILL.md` |
+| (yoktu) | `knowledge/runbooks/` · `incidents/` · `lessons-learned/` · `operations-notes/` |
+| (yoktu) | `knowledge/architecture/decisions/` (ADR) · `roadmap/` |
+| (yoktu) | onay kapısı: `generated/` → `experimental/` → `approved/` |

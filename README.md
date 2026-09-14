@@ -3,14 +3,18 @@
 Aider fork'unda biriken tecrübeyi (**38 beceri** + çalışma kuralları) opencode'a taşıyan hazır paket.
 Kod geliştirme YOK — sadece ayar + içerik. Amaç: **önce denemek**, sonuç iyiyse sonra kod.
 
+**İki katman:** `engine/` = motor (opencode ayarı, güncellenebilir) · `knowledge/` = kurumsal bilgi deposu (kalıcı).
+
 ## Ne var içinde
 | Dosya | Ne işe yarar |
 |---|---|
 | `bin/opencode` | opencode 1.18.30 — **tek ikili dosya** (185 MB), kurulum gerektirmez |
 | `env` | **Doldurulacak 3 satır** (kurum endpoint + anahtar + model kimliği) |
-| `opencode.json` | Sağlayıcı ayarı: kurum Qwen'i OpenAI uyumlu uçtan bağlar · 16k pencere · zaman aşımları · izin kuralları |
-| `skills/` | Aider'dan aktarılan **38 beceri** (opencode'un beklediği biçimle birebir uyumlu) |
-| `AGENTS.md` | Kurum kuralları: dil, envanter disiplini, güvenlik, beceri disiplini, pencere/endpoint notu |
+| `engine/opencode.json` | Sağlayıcı ayarı: kurum Qwen'i OpenAI uyumlu uçtan bağlar · 16k pencere · zaman aşımları · izin kuralları |
+| `engine/AGENTS.md` | Kurum kuralları: dil, envanter disiplini, güvenlik, beceri disiplini, pencere/endpoint notu |
+| `engine/plugins/` | Araç (tool) katmanı — yerel TS plugin'ler (kodlanacak) |
+| `knowledge/skills/approved/` | Aider'dan aktarılan **38 beceri** — opencode'un **okuduğu tek yer** |
+| `knowledge/` | Kurumsal bilgi deposu: `skills` · `runbooks` · `incidents` · `lessons-learned` · `operations-notes` · `architecture` · `roadmap` |
 | `kur.sh` | Tek komutla kurar (offline) — `opencode`+`oc` kısayollarını kurar, sonda `oc-dogrula.sh` çalıştırır |
 | `oc-dogrula.sh` | Kurulumu doğrular (offline; kurum ucu erişilemezse hata değil uyarı verir) |
 | `NASIL-CALISTIRILIR.md` | **Adım adım çalıştırma + sorun giderme** (önce bunu oku) |
@@ -41,14 +45,15 @@ adresine bağlanamamak olmuş (beklenen) — npm/node_modules/lockfile hiç olu�
 2. Kurum ucu **araç çağrısı (tool calling)** destekliyor mu? Desteklemiyorsa ajan modu çalışmaz → haber ver.
 3. 16k pencerede uzun envanter okuma: kırpma/özetleme opencode'un kendi bağlam yönetimine bırakıldı (aider'daki elle bütçe yok).
 
-## GitHub fork
-`https://github.com/alparslanozturk77/opencode` (kaynak: `anomalyco/opencode`, MIT — eski adı `sst/opencode`).
-Kod geliştirme gerekirse bu fork üzerinden gideriz; **şimdilik gerek yok**.
+## Motor (Engine) ve fork kararı
+- Motor = **opencode** (kaynak: `anomalyco/opencode`, MIT — eski adı `sst/opencode`). Kurulum **upstream** sürümüyle yapılır.
+- **Karar: ilk aşamada fork YOK** — yeni sürümler kolay alınsın, güvenlik güncellemeleri kaçmasın, bakım maliyeti düşsün.
+- Yalnız görünürlük için açılmış **birebir kopya** (0 commit, sapma yok): `https://github.com/alparslanozturk/opencode` — kaldırılabilir.
 
 ## Bu depo (git) — geliştirme burada yürür
 
 Bu dizin artık bir **git deposu**dur (opencode ajan kiti). Bkz. `MIMARI.md` (katmanlar + yol haritası).
 
-- **Takip edilenler:** `skills/`, `AGENTS.md`, `opencode.json`, `plugins/`, `kur.sh`, `oc-dogrula.sh`, `*.md`
+- **Takip edilenler:** `engine/` (motor ayarı), `knowledge/` (bilgi deposu), `kur.sh`, `oc-dogrula.sh`, `*.md`
 - **Takip EDİLMEYENLER:** `bin/` (185 MB opencode ikilisi — ayrı `opencode-paket.tar.gz` ile taşınır), `env` (sırlar)
-- Genişletme sırası: `opencode.json` → `AGENTS.md` → `skills/` → `plugins/` → (yetmezse) fork
+- Genişletme sırası: `engine/opencode.json` → `engine/AGENTS.md` → `knowledge/skills/` → `engine/plugins/` → (yetmezse) fork

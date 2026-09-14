@@ -38,11 +38,11 @@ yesil "  kuruldu: $HOME/.opencode/bin/opencode"
 
 echo "== 2/3  ayar + kurallar + beceriler =="
 mkdir -p "$HOME/.config/opencode"
-[ -f "$KOK/AGENTS.md" ] && cp -f "$KOK/AGENTS.md" "$HOME/.config/opencode/AGENTS.md"
+[ -f "$KOK/engine/AGENTS.md" ] && cp -f "$KOK/engine/AGENTS.md" "$HOME/.config/opencode/AGENTS.md"
 rm -rf "$HOME/.config/opencode/skills"; mkdir -p "$HOME/.config/opencode/skills"
-cp -r "$KOK/skills/." "$HOME/.config/opencode/skills/"
+cp -r "$KOK/knowledge/skills/approved/." "$HOME/.config/opencode/skills/"
 
-python3 - "$KOK/opencode.json" "$HOME/.config/opencode/opencode.json" "$KURUM_URL" "$KURUM_KEY" "$MODEL_ID" <<'PY'
+python3 - "$KOK/engine/opencode.json" "$HOME/.config/opencode/opencode.json" "$KURUM_URL" "$KURUM_KEY" "$MODEL_ID" <<'PY'
 import json, sys
 src, dst, url, key, mid = sys.argv[1:6]
 d = json.load(open(src, encoding="utf-8"))

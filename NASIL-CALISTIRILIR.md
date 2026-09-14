@@ -31,6 +31,18 @@ opencode              # kısa ad: oc
 
 ---
 
+## Depo düzeni: motor / bilgi
+
+| Katman | Yer | Ne |
+|---|---|---|
+| **Motor** | `engine/` | `AGENTS.md` (kurallar) · `opencode.json` (ayar) · `plugins/` (araç) |
+| **Bilgi** | `knowledge/` | `skills/approved/` (canlı beceriler) · `experimental/` · `generated/` · `runbooks/` · `incidents/` · `lessons-learned/` · `operations-notes/` · `architecture/` · `roadmap/` |
+
+`kur.sh` becerileri **yalnız `knowledge/skills/approved/`**'dan kurar; ajan `experimental/` + `generated/`'ı okumaz
+(onay kapısı — *"AI kendi kendine öğrenmez, öğrenme önerir"*).
+
+---
+
 ## Sorun giderme
 
 | Belirti | Ne yapılır |
@@ -81,4 +93,4 @@ aider             # ya da venv/bin/aider
 | aider fork + venv | `/root/work/aider/` |
 
 ---
-*Patron/Doktor · 2026-09-12 · opencode v1.18.30*
+*Patron/Doktor · 2026-09-14 · opencode v1.18.30*

@@ -15,7 +15,7 @@ Yerel dosya plugin tercih edilir (gerekirse yanına `package.json` ile bağıml�
 
 | İhtiyaç | Katman |
 |---|---|
-| "Şu işi şöyle yap" (usül bilgisi, karar, kontrol listesi) | **Beceri** (`skills/…/SKILL.md`) |
+| "Şu işi şöyle yap" (usül bilgisi, karar, kontrol listesi) | **Beceri** (`knowledge/skills/approved/…/SKILL.md`) |
 | Var olan komutları çalıştırmak (ssh, kubectl, ansible, curl) | **Yerleşik `bash`** |
 | Deterministik iş: çıktı ayrıştırma, sayı doğrulama, format üretme | **Tool (plugin)** |
 | Zorunlu kapı: yıkıcı komut engeli, kapsam dışı yol reddi | **Tool (hook) / `permission`** |

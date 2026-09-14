@@ -64,7 +64,7 @@ else
 fi
 
 echo "== 3/6  opencode.json — geçerli JSON + şablon dolu mu =="
-CFG="$KOK/opencode.json"
+CFG="$KOK/engine/opencode.json"
 if [ ! -f "$CFG" ]; then
   hata "$CFG YOK"
 elif command -v python3 >/dev/null 2>&1 && python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$CFG" 2>/dev/null; then
@@ -79,20 +79,30 @@ else
 fi
 
 echo "== 4/6  beceriler (38 beklenir) + AGENTS.md =="
-if [ -d "$KOK/skills" ]; then
-  n="$(find "$KOK/skills" -mindepth 1 -maxdepth 1 -type d | wc -l)"
+if [ -d "$KOK/knowledge/skills/approved" ]; then
+  n="$(find "$KOK/knowledge/skills/approved" -mindepth 1 -maxdepth 1 -type d | wc -l)"
   if [ "$n" -eq 38 ]; then
     ok "beceri sayısı: $n"
   else
     uyar "beceri sayısı $n — 38 bekleniyordu"
   fi
 else
-  hata "skills/ dizini YOK"
+  hata "knowledge/skills/approved dizini YOK"
 fi
-if [ -f "$KOK/AGENTS.md" ]; then
+if [ -f "$KOK/engine/AGENTS.md" ]; then
   ok "AGENTS.md var"
 else
   hata "AGENTS.md YOK"
+fi
+
+eksik=""
+for d in skills/approved skills/experimental skills/generated runbooks incidents lessons-learned operations-notes architecture roadmap; do
+  [ -d "$KOK/knowledge/$d" ] || eksik="$eksik $d"
+done
+if [ -z "$eksik" ]; then
+  ok "knowledge iskeleti tam (9 dizin)"
+else
+  hata "knowledge/ altinda eksik dizin:$eksik"
 fi
 
 echo "== 5/6  kurum uç erişilebilirliği (bulunamazsa UYARI, hata değil) =="
