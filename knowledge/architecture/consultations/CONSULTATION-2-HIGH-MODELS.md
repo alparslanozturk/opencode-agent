@@ -3,7 +3,7 @@
 **Tarih:** 2026-09-14
 **Sorgulanan modeller:** Claude Opus 5 (Doktor) · Codex gpt-5.5 · Gemini 3.1 Pro (Antigravity/agy)
 **Yöntem:** Aynı brief (`SORU2.md`) üç modele paralel verildi + internet araştırması (Tavily, 2026 pratikleri).
-**Bağlam:** `/root/opencode` — Engine (opencode) + Knowledge (git) mimarisi, Faz 1 salt-okunur hedefi, 1-2 kişilik ekip, air-gapped'e yakın kurum ortamı.
+**Bağlam:** `/root/opencode-agent` — Engine (opencode) + Knowledge (git) mimarisi, Faz 1 salt-okunur hedefi, 1-2 kişilik ekip, air-gapped'e yakın kurum ortamı.
 **Tam metinler:** Ek 1 (Opus), Ek 2 (Codex), Ek 3 (Gemini Pro).
 
 ---

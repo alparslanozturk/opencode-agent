@@ -12,11 +12,11 @@
 
 ```bash
 # 1) paketi getir ve 3 satırı doldur
-tar xJf opencode-paket.tar.xz -C /root      # -> /root/opencode/   (.tar.gz ise: tar xzf ...)
-vi /root/opencode/env                    # KURUM_URL=http://sunucu:port/v1 (+ KURUM_KEY, MODEL_ID)
+tar xJf opencode-paket.tar.xz -C /root      # -> /root/opencode-agent/   (.tar.gz ise: tar xzf ...)
+vi /root/opencode-agent/env                    # KURUM_URL=http://sunucu:port/v1 (+ KURUM_KEY, MODEL_ID)
 
 # 2) kur (offline; ikili + ayar + 38 beceri + oc/opencode kısayolları kurulur, sonda otomatik doğrulama çalışır)
-/root/opencode/kur.sh
+/root/opencode-agent/kur.sh
 
 # 3) çalıştır
 cd /root/work/aider   # hangi dizinde çalışacaksan orada aç
@@ -34,7 +34,7 @@ cp env.example env 2>/dev/null || vi env   # env oluştur + 3 satırı doldur
 
 **Doğrulama** (istediğin zaman tekrar çalıştırılabilir, internet gerektirmez):
 ```bash
-/root/opencode/oc-dogrula.sh
+/root/opencode-agent/oc-dogrula.sh
 ```
 
 ---
@@ -96,7 +96,7 @@ aider             # ya da venv/bin/aider
 | opencode ayarı | `~/.config/opencode/opencode.json` |
 | kurallar | `~/.config/opencode/AGENTS.md` |
 | beceriler | `~/.config/opencode/skills/<ad>/SKILL.md` (38 adet) |
-| paket (kaynak dosyalar) | `/root/opencode/` |
+| paket (kaynak dosyalar) | `/root/opencode-agent/` |
 | kaynak klonu (çalıştırmak için gerekmez) | `/root/work/opencode` |
 | aider fork + venv | `/root/work/aider/` |
 

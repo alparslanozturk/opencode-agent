@@ -2,7 +2,7 @@
 # =============================================================================
 #  kur.sh — opencode paketi kurucusu (kurum içi, offline; ağ/npm gerekmez).
 #
-#  Kullanım:  cd /root/opencode && ./kur.sh
+#  Kullanım:  cd /root/opencode-agent && ./kur.sh
 #    --baglanti-yok     kısayolları kurma (yalnız ikili + ayar + beceri)
 #    --baglanti-zorla   mevcut başka bir 'opencode'/'oc' varsa yedekle ve üzerine yaz
 #  Ortam değişkeni: KISAYOL_DIZIN (varsayılan /usr/local/bin, yazılamıyorsa ~/.local/bin)
