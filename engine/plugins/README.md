@@ -20,7 +20,25 @@ Yerel dosya plugin tercih edilir (gerekirse yanına `package.json` ile bağıml�
 | Deterministik iş: çıktı ayrıştırma, sayı doğrulama, format üretme | **Tool (plugin)** |
 | Zorunlu kapı: yıkıcı komut engeli, kapsam dışı yol reddi | **Tool (hook) / `permission`** |
 
-## Aday araçlar (kodlanacak — öneri, önceliği deneme belirler)
+## Mevcut plugin'ler
+
+| Dosya | Ne yapar | Durum |
+|---|---|---|
+| `audit-log.ts` | `tool.execute.before`/`after` + `session.idle` hook'larıyla her araç çağrısını `AUDIT-FORMAT.md` §2 şemasına uyan, hash zincirli (§3) bir JSONL satırı olarak `/var/log/ops-agent/audit.jsonl`'a yazar. Bağımlılıksız (yalnız Node/Bun çekirdek modülleri: `fs`, `crypto`, `child_process`, `os`, `path`). **Faz 0'ın ilk gerçek plugin'i.** | Kodlandı, birim testleriyle doğrulandı (bkz. `notlar/FAZ0-RAPOR.md`) |
+
+`audit-log.ts`, `kur.sh` tarafından `~/.config/opencode/plugins/`'e kopyalanır (bkz. bu dosyanın kur.sh'daki
+"plugin" adımı) — auto-discovery mekanizmasıyla ek config'e gerek kalmadan yüklenir.
+
+### `audit-log.ts` bilinen sınırlar (Faz 0 sonrası ele alınacak)
+
+- `task_id`, `gen_ai.usage.input_tokens/output_tokens`, `gen_ai.request.model_digest`: opencode 1.18.30'da
+  `tool.execute.*` hook girdisinde bu bilgi yok; alanlar `null` yazılır (fabrikasyon yok).
+- `policy_decision`: hook seviyesinde `allow`/`deny` ayrımı güvenilir gözlemlenemiyor (izin reddi genelde
+  `tool.execute.after` hiç tetiklenmeden istisna fırlatıyor); v1 sezgisel kural kullanır — bkz. rapor.
+- Çok-oturumlu eşzamanlı yazımda tam dosya kilidi yok (v1 tek-yazar varsayımı, `THREAT-MODEL.md` "tek makine"
+  kapsamıyla uyumlu).
+
+## Aday araçlar (henüz kodlanmadı — öneri, önceliği deneme belirler)
 
 | Araç | Ne yapar | Neden beceri yetmez |
 |---|---|---|

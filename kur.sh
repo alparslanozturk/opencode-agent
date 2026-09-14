@@ -82,6 +82,15 @@ PY
 yesil "  config: $HOME/.config/opencode/opencode.json"
 yesil "  beceri: $(ls "$HOME/.config/opencode/skills" | wc -l) adet → ~/.config/opencode/skills"
 
+mkdir -p "$HOME/.config/opencode/plugins"
+if compgen -G "$KOK/engine/plugins/*.ts" > /dev/null || compgen -G "$KOK/engine/plugins/*.js" > /dev/null; then
+  cp -f "$KOK"/engine/plugins/*.ts "$HOME/.config/opencode/plugins/" 2>/dev/null || true
+  cp -f "$KOK"/engine/plugins/*.js "$HOME/.config/opencode/plugins/" 2>/dev/null || true
+  yesil "  plugin: $(ls "$HOME/.config/opencode/plugins" | wc -l) adet → ~/.config/opencode/plugins (açılışta okunur, tekrar açman gerekebilir)"
+else
+  sari "  engine/plugins/ altında .ts/.js yok — plugin kurulumu atlandı"
+fi
+
 # ---------------------------------------------------------------------------
 #  3) 'opencode' + 'oc' kısayolları
 # ---------------------------------------------------------------------------
