@@ -30,7 +30,7 @@ uyar() { sari    "  ! $*"; UYARI=$((UYARI + 1)); }
 
 BIN="$KOK/bin/opencode"
 
-echo "== 1/6  ikili — varlık + ELF mimarisi + glibc uyumu (RHEL9+) =="
+echo "== 1/7  ikili — varlık + ELF mimarisi + glibc uyumu (RHEL9+) =="
 if [ ! -e "$BIN" ]; then
   hata "$BIN YOK"
 else
@@ -52,7 +52,7 @@ else
   fi
 fi
 
-echo "== 2/6  opencode --version =="
+echo "== 2/7  opencode --version =="
 if [ -x "$BIN" ]; then
   if v="$(timeout 30 "$BIN" --version 2>&1)"; then
     ok "opencode $v"
@@ -63,7 +63,7 @@ else
   uyar "ikili çalıştırılabilir değil — sürüm kontrolü atlandı"
 fi
 
-echo "== 3/6  opencode.json — geçerli JSON + şablon dolu mu =="
+echo "== 3/7  opencode.json — geçerli JSON + şablon dolu mu =="
 CFG="$KOK/engine/opencode.json"
 if [ ! -f "$CFG" ]; then
   hata "$CFG YOK"
@@ -78,16 +78,18 @@ else
   hata "opencode.json GEÇERSİZ JSON"
 fi
 
-echo "== 4/6  beceriler (38 beklenir) + AGENTS.md =="
+echo "== 4/7  beceriler (repo: approved/, kurulu: ~/.config/opencode/skills/) + AGENTS.md =="
 if [ -d "$KOK/knowledge/skills/approved" ]; then
   n="$(find "$KOK/knowledge/skills/approved" -mindepth 1 -maxdepth 1 -type d | wc -l)"
-  if [ "$n" -eq 38 ]; then
-    ok "beceri sayısı: $n"
-  else
-    uyar "beceri sayısı $n — 38 bekleniyordu"
-  fi
+  ok "onaylı beceri havuzu (repo): $n adet"
 else
   hata "knowledge/skills/approved dizini YOK"
+fi
+if [ -d "$HOME/.config/opencode/skills" ]; then
+  nk="$(find "$HOME/.config/opencode/skills" -mindepth 1 -maxdepth 1 -type d | wc -l)"
+  ok "kurulu beceri (~/.config/opencode/skills): $nk adet (çekirdek varsayılan: 6-10; hepsi için: ./kur.sh --tum-beceriler)"
+else
+  uyar "~/.config/opencode/skills yok — kur.sh henüz çalıştırılmamış olabilir"
 fi
 if [ -f "$KOK/engine/AGENTS.md" ]; then
   ok "AGENTS.md var"
@@ -105,7 +107,17 @@ else
   hata "knowledge/ altinda eksik dizin:$eksik"
 fi
 
-echo "== 5/6  kurum uç erişilebilirliği (bulunamazsa UYARI, hata değil) =="
+echo "== 5/7  ripgrep (grep/glob araçları bunu kullanır) =="
+RG_CACHE_DIZIN="${XDG_CACHE_HOME:-$HOME/.cache}/opencode/bin"
+if command -v rg >/dev/null 2>&1; then
+  ok "rg PATH'te: $(command -v rg) ($(rg --version | head -1))"
+elif [ -x "$RG_CACHE_DIZIN/rg" ]; then
+  ok "rg kurulu: $RG_CACHE_DIZIN/rg ($("$RG_CACHE_DIZIN/rg" --version 2>/dev/null | head -1))"
+else
+  hata "rg YOK (PATH'te değil, $RG_CACHE_DIZIN/rg da yok) — grep/glob araçları kurum ağında kırılır"
+fi
+
+echo "== 6/7  kurum uç erişilebilirliği (bulunamazsa UYARI, hata değil) =="
 KURUM_URL=""
 # shellcheck disable=SC1090
 if [ -f "$KOK/env" ]; then set -a; . "$KOK/env" 2>/dev/null || true; set +a; fi
@@ -122,9 +134,11 @@ case "${KURUM_URL:-}" in
     ;;
 esac
 
-echo "== 6/6  izin özeti =="
-if [ -f "$CFG" ] && command -v python3 >/dev/null 2>&1; then
-  python3 - "$CFG" <<'PY' 2>/dev/null
+echo "== 7/7  izin özeti + bağlam penceresi + agent/steps =="
+FILLED_CFG="$CFG"
+[ -f "$HOME/.config/opencode/opencode.json" ] && FILLED_CFG="$HOME/.config/opencode/opencode.json"
+if [ -f "$FILLED_CFG" ] && command -v python3 >/dev/null 2>&1; then
+  python3 - "$FILLED_CFG" <<'PY' 2>/dev/null
 import json, sys
 try:
     d = json.load(open(sys.argv[1]))
@@ -135,9 +149,23 @@ print(f"  · edit={p.get('edit')} read={p.get('read')} grep={p.get('grep')} glob
 print(f"  · external_directory={p.get('external_directory')}")
 b = p.get("bash", {})
 if isinstance(b, dict):
-    print(f"  · bash.*={b.get('*')}  deny-kalıp sayısı={len([k for k,v in b.items() if v=='deny'])}")
+    allow_n = len([k for k, v in b.items() if v == "allow"])
+    deny_n = len([k for k, v in b.items() if v == "deny"])
+    print(f"  · bash.*={b.get('*')}  allow-kalıp={allow_n}  deny-kalıp={deny_n}")
+print(f"  · default_agent={d.get('default_agent')}")
+build_steps = d.get("agent", {}).get("build", {}).get("steps")
+plan_perm = d.get("agent", {}).get("plan", {}).get("permission", {})
+print(f"  · agent.build.steps={build_steps}  agent.plan.permission={plan_perm}")
+prov = d.get("provider", {})
+for name, p2 in prov.items():
+    for mid, m in p2.get("models", {}).items():
+        lim = m.get("limit", {})
+        print(f"  · limit.context={lim.get('context')} (provider={name}/{mid})")
+comp = d.get("compaction", {})
+if comp:
+    print(f"  · compaction={comp}")
 PY
-  eddir="$(python3 -c "import json;print(json.load(open('$CFG')).get('permission',{}).get('external_directory'))" 2>/dev/null)"
+  eddir="$(python3 -c "import json;print(json.load(open('$FILLED_CFG')).get('permission',{}).get('external_directory'))" 2>/dev/null)"
   if [ "$eddir" = "ask" ]; then
     ok "external_directory=ask görünüyor (proje kökü dışına çıkış izin ister)"
   else
@@ -148,6 +176,12 @@ else
 fi
 
 echo
+echo "== ÖZET (tek ekran) =="
+echo "  · kurulum kökü:        $KOK"
+echo "  · kurallar/ayar:       $HOME/.config/opencode/"
+echo "  · AGENTS.md kurulu mu: $([ -f "$HOME/.config/opencode/AGENTS.md" ] && echo evet || echo HAYIR)"
+echo "  · rg kurulu mu:        $(command -v rg >/dev/null 2>&1 && echo evet || { [ -x "$RG_CACHE_DIZIN/rg" ] && echo evet || echo HAYIR; })"
+
 if [ "$HATA" -gt 0 ]; then
   kirmizi "SONUÇ: $HATA hata, $UYARI uyarı"
   exit 1

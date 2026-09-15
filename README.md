@@ -10,10 +10,10 @@ Kod geliştirme YOK — sadece ayar + içerik. Amaç: **önce denemek**, sonuç 
 |---|---|
 | `bin/opencode` | opencode 1.18.30 — **tek ikili dosya** (185 MB), kurulum gerektirmez |
 | `env` | **Doldurulacak 3 satır** (kurum endpoint + anahtar + model kimliği) |
-| `engine/opencode.json` | Sağlayıcı ayarı: kurum Qwen'i OpenAI uyumlu uçtan bağlar · 16k pencere · zaman aşımları · izin kuralları |
+| `engine/opencode.json` | Sağlayıcı ayarı: kurum Qwen'i OpenAI uyumlu uçtan bağlar · bağlam penceresi (`kur.sh` otomatik tespit eder) · zaman aşımları · izin kuralları |
 | `engine/AGENTS.md` | Kurum kuralları: dil, envanter disiplini, güvenlik, beceri disiplini, pencere/endpoint notu |
 | `engine/plugins/` | Araç (tool) katmanı — yerel TS plugin'ler (kodlanacak) |
-| `knowledge/skills/approved/` | Aider'dan aktarılan **38 beceri** — opencode'un **okuduğu tek yer** |
+| `knowledge/skills/approved/` | Aider'dan aktarılan **38 beceri** havuzu — opencode'un **okuduğu tek yer**; `kur.sh` varsayılan olarak yalnız **9 çekirdek** beceriyi kurar (`--tum-beceriler` ile hepsi) |
 | `knowledge/` | Kurumsal bilgi deposu: `skills` · `runbooks` · `incidents` · `lessons-learned` · `operations-notes` · `architecture` · `roadmap` |
 | `kur.sh` | Tek komutla kurar (offline) — `opencode`+`oc` kısayollarını kurar, sonda `oc-dogrula.sh` çalıştırır |
 | `oc-dogrula.sh` | Kurulumu doğrular (offline; kurum ucu erişilemezse hata değil uyarı verir) |
@@ -24,7 +24,8 @@ Kod geliştirme YOK — sadece ayar + içerik. Amaç: **önce denemek**, sonuç 
 ```bash
 # 1) 3 satırı doldur:
 vi env            # KURUM_URL=http://sunucu:port/v1 (+ KURUM_KEY, MODEL_ID)
-# 2) kur (ikili + ayar + 38 beceri kurulur, sonda otomatik doğrulama çalışır, kısayollar: opencode + oc):
+# 2) kur (ikili + ayar + 9 çekirdek beceri kurulur, bağlam penceresi otomatik tespit edilir,
+#    sonda otomatik doğrulama çalışır, kısayollar: opencode + oc; hepsi için: --tum-beceriler):
 ./kur.sh
 # 3) çalıştır:
 opencode          # kısa ad: oc
@@ -43,7 +44,7 @@ adresine bağlanamamak olmuş (beklenen) — npm/node_modules/lockfile hiç olu�
 ## Bilmeceler (denemede bakılacaklar)
 1. ~~`@ai-sdk/openai-compatible` eklentisi offline yüklenebiliyor mu?~~ **Çözüldü:** evet, ikiliye gömülü — npm gerekmiyor.
 2. Kurum ucu **araç çağrısı (tool calling)** destekliyor mu? Desteklemiyorsa ajan modu çalışmaz → haber ver.
-3. 16k pencerede uzun envanter okuma: kırpma/özetleme opencode'un kendi bağlam yönetimine bırakıldı (aider'daki elle bütçe yok).
+3. Küçük pencerede uzun envanter okuma: kırpma/özetleme opencode'un kendi bağlam yönetimine bırakıldı (aider'daki elle bütçe yok). **Bilinen sınır (Aşama 2 ile ölçüldü):** taban bağlam (sistem promptu + AGENTS.md + beceri listesi + araç şemaları) tek başına 16384'lük bir pencerenin %60'ından fazlasını dolduruyor — bkz. `NASIL-CALISTIRILIR.md` → "Compaction thrash".
 
 ## Motor (Engine) ve fork kararı
 - Motor = **opencode** (kaynak: `anomalyco/opencode`, MIT — eski adı `sst/opencode`). Kurulum **upstream** sürümüyle yapılır.

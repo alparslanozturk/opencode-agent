@@ -5,13 +5,13 @@ Aider fork'unda 15 fazda öğrendiğimiz her şeyin opencode'daki durumu.
 ## Doğrudan aktarıldı (bu pakette var)
 | Aider'daki çalışma | opencode'da karşılığı | Durum |
 |---|---|---|
-| 38 beceri (`aider/beceriler/*/SKILL.md`) | `~/.config/opencode/skills/*/SKILL.md` — **aynı frontmatter (`name`+`description`)** | ✅ birebir kopya |
+| 38 beceri (`aider/beceriler/*/SKILL.md`) | `knowledge/skills/approved/*/SKILL.md` — **aynı frontmatter (`name`+`description`)**; varsayılan kurulum bunların **9 çekirdeğini** kurar (bağlam tasarrufu, Aşama 2), `--tum-beceriler` ile hepsi | ✅ birebir kopya (havuz), seçici kurulum (varsayılan) |
 | Proje kuralları / davranış rehberi | `~/.config/opencode/AGENTS.md` (CLAUDE.md de okunuyor) | ✅ |
-| Envanter işinde "araç çalıştırma, sadece oku" dersi (Canlı Test #3 / T-04) | AGENTS.md kuralı + `permission` (bash=ask) | ✅ |
+| Envanter işinde "araç çalıştırma, sadece oku" dersi (Canlı Test #3 / T-04) | AGENTS.md kural **hiyerarşisi** (Aşama 2: mutlak yasak yerine "açıkça istenirse serbest") + `permission.bash` (salt-okunur komutlar allow, gerisi ask) | ✅ |
 | Beceri tetikleme disiplini (B-20/T-03: "envanter" kelimesini tetikleyiciden çıkarma) | Beceriler artık **talep üzerine** yükleniyor; description'lar aynen taşındı | ✅ (daha iyi: otomatik tetikleme yok) |
 | Uzun yanıt/endpoint yavaşlığı (T-01/T-02: 180 sn bekleme, erken pes etme) | `provider.options.timeout=900000`, `headerTimeout=300000`, `chunkTimeout=180000` | ✅ ayarlandı |
-| 16k pencere bilgisi | `models.<m>.limit = {context: 16384, output: 4096}` | ✅ bildirildi |
-| Yıkıcı komut koruması | `permission.bash`: `rm -rf *` / `mkfs*` / force push = **deny**, diğerleri **ask** | ✅ |
+| Bağlam penceresi bilgisi | `models.<m>.limit.context` — Aşama 2'den beri `kur.sh` tarafından `${KURUM_URL}/models`'ten **otomatik tespit** ediliyor (uydurma `16384` yalnız tespit başarısız olursa kalıyor) | ✅ ölçülüyor, varsayılmıyor |
+| Yıkıcı komut koruması | `permission.bash`: `rm -rf *` / `mkfs*` / force push = **deny**; 37 salt-okunur kalıp (`ls*`, `git log*`, ...) = **allow**; gerisi **ask** | ✅ |
 
 ## Çevirici (cc'deki `cevirici/`) — **GEREKMİYOR**
 opencode zaten OpenAI uyumlu konuşuyor; kurum ucu da OpenAI uyumlu → aradan çevirici katmanı yok.
@@ -51,3 +51,10 @@ Aider'ın 15 fazında görülmeyen, opencode'a özgü bir bulgu: **araç çağı
 `notlar/QWEN-COMPACTION-RAPOR.md`). Aider'da bu sınıfta bir sorun yaşanmamıştı çünkü aider'ın döngü
 kontrolü farklı. Ders: opencode'a geçerken "aider'da çalışıyordu" güvencesi harness-seviyesi hatalar
 için geçerli değil — her ikisi de ayrı ayrı test edilmeli.
+
+**Aşama 2 eki (2026-09-15):** Bu hatayı config'ten "düzeltmeye" çalışan iki makul-görünen çözüm de
+**test edildi ve işe yaramadığı ölçüldü**: `agent.build.steps` (1/5/yok — hiçbiri durdurmuyor) ve
+`opencode 1.18.31`'e yükseltme (npm'den indirilip aynı imzayla yeniden üretildi). Ders: bir opencode
+harness hatasına karşı "mantıklı görünen ayarı dene, işe yarasın" varsaymak yeterli değil — her ayarı
+**aynı reprodüksiyon senaryosuyla ölçüp** kanıtlamak gerekiyor; ölçülmeden config'e eklenen bir ayar,
+kullanıcıya yanlış güvenlik hissi verir.

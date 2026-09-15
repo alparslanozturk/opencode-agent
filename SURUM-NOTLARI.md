@@ -1,5 +1,42 @@
 # SÜRÜM NOTLARI — opencode ajan kiti
 
+## 2026-09-15 — Aşama 2: "kur ve çalıştır" + kalıcı sertleştirme (A-J paketleri)
+
+**Ne değişti:**
+- **`kur.sh`**: `${KURUM_URL}/models`'ten bağlam penceresini otomatik tespit edip `limit.context` +
+  `compaction` (prune/reserved/preserve_recent_tokens) yazıyor (env `KURUM_MAX_CONTEXT` yedek yol);
+  varsayılan kurulum 38 → **9 çekirdek beceri** (`--tum-beceriler` ile hepsi); `bin/ripgrep.tar.xz`'den
+  `~/.cache/opencode/bin/rg` kuruyor (opencode'un grep/glob araçlarının beklediği tam yol — kurum ağında
+  ağdan indirilemediği için `ripgrep execution failed` hatasının kaynağıydı); kurulum sonunda çalışma
+  dizini rehberliği içeren tek ekranlık özet basıyor.
+- **`engine/opencode.json`**: `default_agent: build`; `agent.plan.permission` (`edit`/`bash`: `deny`,
+  Plan artık gerçekten yalnızca planlıyor); `permission.bash`'e 37 salt-okunur allow kalıbı eklendi
+  (`ls*`, `cat*`, `git status*`, `find*`, ... — resmi opencode dokümanındaki "last matching rule wins"
+  kuralına göre `"*": "ask"` başta, spesifik kalıplar sonra). `agent.build.steps` **denendi ve
+  kaldırıldı** — livelock hatasını durdurmadığı ölçüldü (bkz. aşağı).
+- **`engine/AGENTS.md`**: mutlak "ssh/kubectl YOK" yasağı kaldırıldı, yerine hiyerarşi ("kullanıcı açıkça
+  isterse serbest, aksi halde salt-okunur") + gerçek envanter yolları (`~/ansible/hosts-*.ini`,
+  `KUBECONFIG`, ktbulut kısıtı) + "izinler burada tanımlanmaz, opencode.json'da" netleştirmesi +
+  "tüm dosya sistemini tarama, @explore kullan" kuralı eklendi.
+- **`oc-dogrula.sh`**: rg kontrolü, kurulu/toplam beceri sayısı ayrımı, `limit.context`/`compaction`/
+  `default_agent`/`steps` özeti, tek ekranlık ÖZET bloğu eklendi (7 adım).
+- Rapor: `notlar/ASAMA-2-RAPOR.md`.
+
+**Ölçülen sonuçlar (gerçek istek gövdesi + `tiktoken cl100k_base` proxy tokenizer, 16384 pencere varsayımıyla):**
+- Taban bağlam: 38 beceri **%89,3** → 9 çekirdek beceri **%63,6** (hedef olan "≤%40" bu pencerede
+  **matematiksel olarak ulaşılamaz** — 0 beceriyle bile %53,7; asıl kaldıraç gerçek pencerenin
+  16384'ten büyük olması, bu yüzden otomatik tespit kritik).
+- `agent.build.steps` (1/5/steps yok, 3 ayrı test): **livelock'u durdurmuyor** — hepsinde 10 saniyede
+  86-138 istek. Config'e eklenmedi.
+- `opencode 1.18.31` (npm'den indirilip test edildi): **aynı hata var** (135 istek/10sn) — sürüm
+  yükseltmesi çözmüyor.
+- `OPENCODE_DISABLE_AUTOCOMPACT=1` + taban pencereyi aşıyor: backend isteği sessizce kabul ederse
+  (200 OK) **hata vermeden livelock'a düşüyor** (Alp'in "hiç açılmadı" gözlemini açıklıyor); backend
+  gerçekten reddederse (HTTP 400) opencode temiz `ContextOverflowError` ile 2 istekte çıkıyor.
+- `compaction.prune`: izole ölçülemedi — test senaryosu compaction eşiğine ulaşmadan önce livelock
+  hatasına düştü (0 compaction olayı). Zararsız varsayılan olarak bırakıldı, kanıtlanmış çözüm olarak
+  sunulmuyor.
+
 ## 2026-09-15 — Compaction thrash düzeltmesi (Vaka 1 + Vaka 2)
 
 **Ne değişti:**

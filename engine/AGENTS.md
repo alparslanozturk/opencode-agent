@@ -4,17 +4,44 @@
 - Yanıtlar **Türkçe**; komut/kod İngilizce kalır. Gereksiz giriş cümlesi, özet, övgü yazma.
 - Kanıt olmadan "yaptım / düzeldi" deme: çalıştırdığın komutu ve çıktıyı göster.
 
-## Envanter / rapor işleri (en sık senaryo)
-- "Envanteri çıkar" ya da "sayıları ver" dendiğinde **araç çalıştırma** (ansible, ssh, kubectl YOK).
-  Yalnızca oku: `Read` / `Glob` / `Grep` ile `hosts*.ini`, kubeconfig, CSV/XLSX içeriğini al; tabloyu kur.
-- Kullanıcı açıkça istemedikçe hiçbir sunucuya bağlanma, playbook çalıştırma, dosya değiştirme.
+## Envanter / rapor işleri (en sık senaryo) — kural hiyerarşisi
+1. **Kullanıcı açıkça "bağlan", "kubectl çalıştır", "envanteri canlı çıkar" derse ssh/kubectl
+   SERBESTTİR.** Bu durumda §"SSH ve Kubernetes erişimi" altındaki gerçek yolları/kuralları kullan.
+2. **Aksi halde (kullanıcı yalnız "envanteri çıkar" / "sayıları ver" dediyse) envanter işi
+   salt-okunurdur:** `Read` / `Glob` / `Grep` ile `hosts*.ini`, kubeconfig, CSV/XLSX içeriğini oku;
+   tabloyu kur. Playbook çalıştırma, dosya değiştirme, sunucuya bağlanma — bunlar 1. maddedeki açık
+   istek olmadan yapılmaz.
 - **Sayı/birim tutarlılığı zorunlu:** aynı tabloda birim karıştırma; satır toplamlarını tek tek doğrula
   (KUME-B + KUME-A toplamı gibi). Kaynağı ve tarihi yaz; ölçmediğin sayıyı "ölçülmedi" diye işaretle.
+
+## SSH ve Kubernetes erişimi (kullanıcı açıkça istediğinde — Alp kuralı, 2026-09-15)
+- **Bağlanmak için host dosyası ARAMAYA GEREK YOK.** Erişim **public key** ile parolasız:
+  `ssh root@<ip> "<komut>"` doğrudan çalışır. `/etc/hosts`, `hosts*.ini`, kubeconfig peşinde tüm
+  dosya sistemini taramak anlamsız — sunucu listesi gerekiyorsa yeri **belli** (arama değil, doğrudan oku):
+  - `~/ansible/hosts-k8s-master.ini` (~132 satır), `~/ansible/hosts-all.ini` (~284 satır)
+  - `~/rke2-ansible-*` klasörleri; ansible.cfg: `/root/aider-work/ansible/ansible.cfg`
+- **kubectl için:** `KUBECONFIG=/etc/rancher/rke2/rke2.yaml` — örn.
+  `kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml get nodes`.
+- **ssh güvenliği:** `StrictHostKeyChecking=accept-new` kullan — **asla `no`**.
+- **🚫 ktbulut erişilemez** (bilinen kısıt): `ktbulut.com.tr` / `10.20.x` / `10.21.x` — bu adreslere
+  ssh **denenmez**; envantere "erişilemez (bilinen kısıt)" notuyla konur. Anthos ayrı sınıflandırılır,
+  aynı kısıt Anthos için varsayılmaz.
 
 ## Güvenlik ve sınırlar
 - Yıkıcı komut (rm -rf, mkfs, dnf remove, servis durdurma, force push) → **önce sor**.
 - Kurum dışına veri gönderme; dış ağ/telemetri kapalı varsay.
 - Üretim kümesinde çalışmadan önce "hangi küme bağlı" doğrula (`k8s-rancher` becerisi).
+- **İzinler bu dosyada TANIMLANMAZ.** Hangi komutun onaysız çalıştığı (`allow`/`ask`/`deny`)
+  `opencode.json` → `permission` bloğunda yazılıdır, burada değil. "AGENTS.md'ye göre izin
+  politikası" diye bir şey söyleme/varsayma — iki dosyayı karıştırma: burası **davranış kuralı**,
+  `opencode.json` **izin kapısı**.
+
+## Dosya arama
+- Tüm dosya sistemini `find /` (ya da `/root`, `/home`, `/var` gibi geniş kökler) ile tarama.
+  Yol biliniyorsa (bu dosyadaki "SSH ve Kubernetes erişimi" gibi) doğrudan oku/aç.
+  Yol bilinmiyorsa ve gerçekten aranması gerekiyorsa `@explore` subagent'ını kullan.
+- **Aynı turda birden fazla bağımsız tarama başlatma** (tek seferde 4 ayrı `find`/`grep` gibi).
+  Tek bir hedefli arama dene, sonucu değerlendir, gerekiyorsa bir sonrakini öner.
 
 ## Beceri (skill) disiplini
 - Beceriler talep üzerine yüklenir; konu kapanınca bırak. Kullanıcı "ansible işlerini bırak" dediyse
@@ -22,14 +49,16 @@
 - Kullanıcının cümlesini tersine çevirme: "x önemli değil" = **x'i yok say** (x'i yapma demek değil).
 
 ## Pencere ve endpoint (kurumsal vLLM)
-- Bağlam penceresi **16k**. Uzun dosya/log'u parça parça oku (`offset`/`limit`), tümünü birden çekme.
+- Bağlam penceresi **küçük** (kurulumda tespit edilen gerçek değer neyse — `/context` veya ekrandaki
+  "X tokens / %Y used" göstergesine bak, sabit bir sayı varsayma). Uzun dosya/log'u parça parça oku
+  (`offset`/`limit`), tümünü birden çekme.
 - Endpoint yavaş: ilk yanıt 60–180 sn sürebilir. Panik yapma; aynı isteği üst üste yineleme.
 
 ## Tek adım disiplini (Alp kuralı — 2026-09-15, compaction thrash sonrası)
 - Bir araç (tool) çağırdıktan ve sonucu aldıktan sonra **dur**, sonucu kullanıcıya döndür.
   "Next Move / Sıradaki adım: ..." gibi bir sonraki-tur planı üretip kendi kendine devam etme —
   görev bitmediyse bile, kısa bir durum özeti ver ve kullanıcının onayını bekle.
-- Bağlam penceresi küçük (16k): plan yazmak da, gereksiz araç çağrısı da pencereyi tüketir.
+- Bağlam penceresi küçük: plan yazmak da, gereksiz araç çağrısı da pencereyi tüketir.
   Emin değilsen çağırma; sor.
 
 ## Çalışma dizini boşsa (Alp kuralı — 2026-09-15)
