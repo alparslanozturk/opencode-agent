@@ -68,6 +68,31 @@ Projede olgunlaşan beceri/kural **global'e terfi eder**:
 `<proje>/.opencode/skills/<ad>/` → paketin `knowledge/skills/approved/<ad>/` altına alınır → `kur.sh` ile
 kurulur → **tüm projelerde** hazır olur. (Bu taşıma bir **Doktor** kalemidir; proje tarafı Alp'in çalışma alanında kalır.)
 
+## İş tipi → klasör + beceri (Alp'in çalışma düzeni)
+
+Tüm çalışmalar tek çalışma alanında (`~/ai/work/`) durabilir; ayrım **klasör** düzeyinde yapılır.
+
+| İş tipi | Klasör | Hazır beceri | Not |
+|---|---|---|---|
+| Envanter üretimi | `~/ai/work/envanter/` | `ansible` + `rapor-uret` / `rapor-excel-pdf` | kaynak Excel/CSV → `inventories/*.ini` + `rapor/*.md` |
+| Ansible playbook'ları | `~/ai/work/ansible/<iş>/` | `ansible` | her playbook seti kendi alt klasöründe |
+| Disk genişletme / LVM | `~/ai/work/ansible/disk-genisletme/` (veya tek seferlik oturum) | `depolama`, `disk-ekleme` | `disk-ekleme` varsayılan kurulumda **yok** |
+| Rancher / K8s teşhis | `~/ai/work/rancher-k8s/` | `k8s-rancher` | `KUBECONFIG=/etc/rancher/rke2/rke2.yaml` |
+| Filo kontrolü (SSH) | `~/ai/work/filo/` | `filo-durum-kontrolu` | aşağıya bak → izin kapısı çıkar |
+| Splunk forwarder | `~/ai/work/ansible/splunk-forwarder/` | `splunk-forwarder` | varsayılan kurulumda **yok** |
+| Baseline / ölçüm | `~/ai/work/baseline/` | (yapılacak) | yöntem skill olarak pakete girecek |
+
+**Beceri kurulumu:** varsayılan olarak 9 çekirdek beceri kurulur
+(`ansible k8s-rancher rhel-yonetim filo-durum-kontrolu rapor-uret hata-ayikla performans sistem-guncelleme depolama`);
+tümünü (38) kurmak için `./kur.sh --tum-beceriler`. Pencere 256K olduğu için bağlam kaygısı yok.
+
+**SSH / uzak sistem notu (önemli):** İzin listesinde salt-okunur yerel komutlar var
+(`ls cat head tail wc file stat pwd whoami hostname uname uptime date df du free ps pvs vgs lvs lsblk blkid
+git status/log/diff/show/branch grep rg find journalctl "systemctl status" ss "ip a" "ip addr" "ip route" mount`).
+`ssh*`, `ansible*`, `kubectl*`, `hammer*` **bilerek yok** → uzak/canlı sistemde her seferinde izin kapısı çıkar.
+Pratik: iş klasörünün içinde `oc --auto` (deny kuralları yine uygulanır) ya da kapıda **Allow always**.
+Bu, paketin çalışma disipliniyle uyumludur: canlı üretimde otomatik uzak komut çalıştırılmaz.
+
 ## Hızlı doğrulama
 
 - Agent'a sor: *"Şu an hangi kural dosyaları yüklendi?"* (payload'da `Instructions from: <yol>` satırları olarak görünür).
