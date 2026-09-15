@@ -93,6 +93,24 @@ git status/log/diff/show/branch grep rg find journalctl "systemctl status" ss "i
 Pratik: iş klasörünün içinde `oc --auto` (deny kuralları yine uygulanır) ya da kapıda **Allow always**.
 Bu, paketin çalışma disipliniyle uyumludur: canlı üretimde otomatik uzak komut çalıştırılmaz.
 
+## Alp'in onayladığı çalışma yapısı (2026-09-15)
+
+```
+~/ai/work/            # ana dizin — tüm projelere buradan ulaşılır
+├─ envanter/          # sadece envanter işleri (not/yetenek opsiyonel)
+├─ ansible/           # tüm playbook'lar
+└─ baseline/          # ayrı çalışma (mevcut, devam ediyor)
+```
+
+Kurallar (karışıklığı önleyen 4 madde):
+
+1. **Her iş tipi = bir klasör.** Daha fazlasına gerek yok; 2 seviyeden derine inme.
+2. **Oturumu işin klasöründe aç** (`cd ~/ai/work/envanter && oc`) → kapsam daralır; dizin dışına çıkarsa izin ister.
+   Ana dizinde açarsan agent tüm projelere uzanabilir.
+3. **Proje içine `AGENTS.md` / yerel beceri koymak opsiyonel** — global kurallar ve beceriler zaten her yerde geçerli.
+   Yalnızca o projeye özel bir kural/akış varsa ekle.
+4. **Programda değişiklik/ayar gerekmez.** Bu düzen tamamen kullanıcı tarafıdır; opencode hangi dizinde açılırsa orayı kapsam alır.
+
 ## Hızlı doğrulama
 
 - Agent'a sor: *"Şu an hangi kural dosyaları yüklendi?"* (payload'da `Instructions from: <yol>` satırları olarak görünür).
