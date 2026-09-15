@@ -138,6 +138,26 @@ Opsiyonel proje notu/hafıza dosyası (dosya zaten varsa **dokunmaz**):
 **Kayıp riski yok:** `mkdir -p` mevcut klasör/dosyaya dokunmaz; `mv`, `rm`, üzerine yazma **yoktur**.
 `baseline/` klasörü hiç ellenmez; mevcut çalışma olduğu gibi kalır. (Doğrulama: komuttan önce ve sonra `ls -la ~/ai/work` → fark yok.)
 
+## Çıktı biçimleri — Excel / PDF (2026-09-15)
+
+Beceri: `rapor-excel-pdf` (pakette **var**, varsayılan 9 çekirdek içinde **yok**).
+
+| İstek | Durum | Not |
+|---|---|---|
+| **.xlsx okuma** | ✅ hiçbir şey gerekmez | Agent `.xlsx`/`.xlsm`'i doğrudan Read ile açar → Excel girdi olarak verilebilir, CSV'ye çevirmek şart değil |
+| **.xlsx üretme** | ✅ `openpyxl` ile | İlk adım: kurulu mu diye **ölçmek** (`importlib.util.find_spec`); yoksa kendiliğinden kurmaz, kullanıcıya söyler |
+| **.pdf üretme** | ⚠️ kurulum gerektirir | Minimal RHEL 10'da pandoc/wkhtmltopdf/weasyprint/libreoffice/ps2pdf + python fpdf/reportlab = **yok** |
+
+**PDF için iki yol:**
+1. **HTML üret → tarayıcıda “Yazdır → PDF”** — kurulum yok, önerilen (`rapor-uret` becerisi).
+2. `fpdf2` kur (saf Python wheel, derleme yok). **Kurumda paket kurmak onay/değişiklik kaydı ister.**
+
+**PDF Türkçe font tuzağı:** hazır fontlar latin-1 → `ş ğ İ` hata verir. Unicode TTF gerekir; **yolunu sabit yazma**, ara:
+`find /usr/share/fonts -name "*.ttf" | head`. (`dejavu-sans-fonts` baseos'ta, EPEL gerekmez.)
+
+**Beceriyi kurma:** `./kur.sh --tum-beceriler` (hepsi). Elle `cp -r knowledge/skills/approved/<ad> ~/.config/opencode/skills/`
+**geçicidir** — `kur.sh` beceri dizinini baştan yazdığı için sonraki çalıştırmada silinir.
+
 ## Hızlı doğrulama
 
 - Agent'a sor: *"Şu an hangi kural dosyaları yüklendi?"* (payload'da `Instructions from: <yol>` satırları olarak görünür).
