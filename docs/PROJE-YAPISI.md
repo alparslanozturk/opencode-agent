@@ -111,6 +111,33 @@ Kurallar (karışıklığı önleyen 4 madde):
    Yalnızca o projeye özel bir kural/akış varsa ekle.
 4. **Programda değişiklik/ayar gerekmez.** Bu düzen tamamen kullanıcı tarafıdır; opencode hangi dizinde açılırsa orayı kapsam alır.
 
+## Önerilen iskelet (2026-09-15 — Alp onayı)
+
+```
+~/ai/work/
+├─ envanter/{kaynak,inventories,rapor}     # sunucu listesi → envanter + rapor
+├─ ansible/{playbooks,roles,inventories}   # tüm playbook'lar
+└─ baseline/                               # DOKUNULMAZ (mevcut çalışma)
+```
+
+Kurulum komutları — **yalnızca eksik klasörü yaratır**, hiçbir şeyi silmez, üzerine yazmaz:
+
+```bash
+cd ~/ai/work
+mkdir -p envanter/kaynak envanter/inventories envanter/rapor
+mkdir -p ansible/playbooks ansible/roles ansible/inventories
+ls -la ~/ai/work
+```
+
+Opsiyonel proje notu/hafıza dosyası (dosya zaten varsa **dokunmaz**):
+
+```bash
+[ -f envanter/AGENTS.md ] || printf '%s\n' '# Envanter projesi' '' '## Proje notları' > envanter/AGENTS.md
+```
+
+**Kayıp riski yok:** `mkdir -p` mevcut klasör/dosyaya dokunmaz; `mv`, `rm`, üzerine yazma **yoktur**.
+`baseline/` klasörü hiç ellenmez; mevcut çalışma olduğu gibi kalır. (Doğrulama: komuttan önce ve sonra `ls -la ~/ai/work` → fark yok.)
+
 ## Hızlı doğrulama
 
 - Agent'a sor: *"Şu an hangi kural dosyaları yüklendi?"* (payload'da `Instructions from: <yol>` satırları olarak görünür).
