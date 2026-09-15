@@ -44,6 +44,9 @@
     "grep": "allow",
     "glob": "allow",
     "list": "allow",
-    "external_directory": "ask"
+    "external_directory": "ask",
+    "webfetch": "deny",
+    "task": "deny",
+    "todowrite": "deny"
   }
 }

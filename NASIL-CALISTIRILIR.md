@@ -62,6 +62,82 @@ cp env.example env 2>/dev/null || vi env   # env oluştur + 3 satırı doldur
 | TUI bozuk görünüyor (glif/kutu) | Terminal fontu/UTF-8; `TERM=xterm-256color` |
 | `opencode`/`oc` PATH'te yok | `kur.sh` çıktısındaki NOT satırına bak; `export PATH="<kısayol-dizini>:$PATH"` |
 | Var olan başka bir `opencode`/`oc` kısayolu var | `kur.sh` uyarır ve dokunmaz; üzerine yazmak için `kur.sh --baglanti-zorla` (eskisini yedekler) |
+| Ekranda sürekli `⠋ Thinking` + `Compaction`/`Build` art arda dönüyor, hiç ilerlemiyor | **Bilinen sorun, aşağıya bak** ("Compaction thrash / sonsuz döngü") |
+| Çalışma dizini boş (`ll` → `total 0`) ama opencode yine de çalışıyor | Paket o makinede **açılmamış olabilir** — aşağıdaki "Dağıtım kontrolü"ne bak |
+
+---
+
+## Compaction thrash / sonsuz döngü (2026-09-15, kanıtlı kök neden)
+
+**Belirti:** Basit bir istekte (`ls`, "dizini listele") bile ekran sürekli `⠋ Thinking` →
+`Compaction · Qwen...` → `Build · ...` arasında dönüyor, context doluyor (`%86 used` gibi), agent
+tool çağırmak yerine "Next Move / Receive user response..." tipi plan metni üretip duruyor. `esc` ile
+kesmek gerekiyor.
+
+**Kök neden (iki katmanlı, offline olarak `bin/opencode` ile ölçüldü — kurum endpoint'i gerekmedi):**
+
+1. **Baseline bağlam zaten pencerenin ~%87'si.** Boş bir dizinde, 38 becerili bu paketle, modele
+   giden **ilk** istek (hiç konuşma geçmişi yokken) şu boyutta:
+   - opencode'un yerleşik sistem promptu: ~8.9K karakter (bizim değiştiremeyeceğimiz, ikiliye gömülü)
+   - bizim `AGENTS.md`: ~2.5K karakter
+   - 38 becerinin `<name>+<description>+<location>` listesi (tam içerik değil — mekanizma zaten
+     "talep üzerine" çalışıyor): ~16.9K karakter
+   - araç (tool) şemaları (`bash/edit/read/grep/glob/write/skill/task/todowrite/webfetch`): ~21.1K karakter
+   - **Toplam ≈ 48.7K karakter ≈ ~14.3K token** — 16384'lük pencerenin **%87'si**, sahadaki
+     "14,087 tokens — %86 used" görüntüsüyle birebir örtüşüyor.
+   - Ölçüm yöntemi: `engine/opencode.json`'daki `baseURL`'i yerel bir mock HTTP sunucuya yönlendirip
+     (`opencode run "..." --format json`), sunucuya gelen gerçek istek gövdesi kaydedildi — hiçbir
+     tahmin/varsayım yok, gerçek bayt sayısı.
+2. **Model araç çağırmayan (plan metni gibi) bir yanıt döndürdüğünde, opencode 1.18.30'un adım
+   döngüsü DURMUYOR.** Aynı senaryo yerel mock ile yeniden üretildi: mock, `finish_reason: "stop"`
+   ve düz metin içeren geçerli bir OpenAI-uyumlu yanıt döndürdüğünde, opencode **aynı isteği
+   saniyede onlarca kez, hiç bekleme/üst sınır olmadan** tekrar gönderdi (12 saniyede 178 adım,
+   her `step-finish` olayı `"reason":"unknown"`). `doom_loop` iznini `"deny"` yapmak bu döngüyü
+   **durdurmadı** — bu desen mevcut doom-loop korumasının kapsamı dışında.
+   → Bu, **modelden bağımsız, ikiliye gömülü bir harness hatası**; repo içinden (AGENTS.md,
+   opencode.json, skill) düzeltilemez. Sahadaki "Compaction" döngüsü muhtemelen bunun büyümüş hâli:
+   gerçek model her turda farklı metin ürettiği için konuşma geçmişi büyüyor → auto-compact tetikleniyor
+   → döngü modeli yine araç çağırmıyor → tekrar büyüyor → tekrar compact... sonsuz.
+
+**Bu depoda yapılan azaltmalar (kökü düzeltmez, ama alanı büyütür + tetiklenme ihtimalini azaltır):**
+- `engine/opencode.json`: `permission.webfetch/task/todowrite = "deny"`. Ölçülen etki: araç şeması
+  21.1K → 13.1K karakter (**~8K karakter / bağlamın ~%16'sı geri kazanıldı**). Ayrıca `task` (alt-agent
+  başlatma) bu 16k'lık modelde özellikle tehlikeli: her alt-agent kendi ~14K'lık baseline'ını yeniden
+  yükler — iç içe thrash riski. `webfetch` zaten AGENTS.md'deki "dış ağa veri gönderme" kuralıyla çelişiyordu.
+- `engine/AGENTS.md`: "Tek adım disiplini" ve "Çalışma dizini boşsa" kuralları eklendi (bkz. dosya) —
+  modelin araç çağırmayıp plan metni üretme ihtimalini azaltmayı hedefler; harness hatasını düzeltmez.
+
+**Canlıda denenebilecek (bu ortamda test edilemedi, gerçek kurum Qwen erişimi gerekir):**
+- `OPENCODE_DISABLE_AUTOCOMPACT=1 opencode` — auto-compact'i kapatıp döngü davranışını "compaction"
+  gürültüsü olmadan gözlemlemek için bir teşhis anahtarı (kalıcı çözüm değil; context taşarsa sert hata
+  verir).
+- `opencode.json` → `"compaction": {"auto": false}` aynı anahtarın config karşılığı (yerleşik
+  `customize-opencode` skill'inde belgeli alan).
+- Döngü başladığında `esc` ile kesip tekrar aynı isteği vermek yerine, daha dar/somut bir istek
+  ("sadece `ls -la` çalıştır, yorum yapma") vermek — plan-metni tetiklenme ihtimalini pratikte azaltıyor.
+- Gerçek kurum Qwen'in **tek turda geçerli `tool_calls` üretip üretmediği** hâlâ doğrulanmadı (bu ortamda
+  yalnız harness'in tool-call'u doğru şekilde YÜRÜTTÜĞÜ doğrulanabildi, modelin ÜRETTİĞİ doğrulanamadı) —
+  aşağıdaki "Dağıtım kontrolü"nden sonra 3 gerçek görevle bakılmalı.
+
+### Gerçek context penceresini ölçme (yapılmadı — repo içinden garanti edilemez)
+`limit.context: 16384` şu an **doğrulanmamış bir varsayım** (aider'dan aktarılmış). Büyütmeden önce:
+1. Kurum vLLM endpoint'inin `/v1/models` ya da sunucu başlatma loglarından `max_model_len` değerini iste.
+2. Ya da `opencode.json`'da `limit.context`'i küçük adımlarla artırıp, endpoint'in "context length exceeded"
+   benzeri bir hata döndürdüğü noktayı bul.
+Doğrulanmadan büyütülürse: model sınırı aşan bir istek gönderilir, endpoint muhtemelen sert hata döner
+(sessiz kesilmeden daha iyi, ama yine de yanlış bir sayı üstünde plan yapılmış olur).
+
+### Dağıtım kontrolü (Vaka 2: srvsatellite'ta boş çalışma dizini)
+`/root/ai/work/opencode-agent` gibi bir dizinin **boş olması normaldir** — `kur.sh`, `AGENTS.md`'yi ve
+becerileri **global** `~/.config/opencode/`'a kurar, proje dizinine değil (yukarıdaki "3 adımda kurulum"a
+bak: adım 3'te `cd` edilen dizin keyfi bir çalışma dizinidir, paketin kendisi değil). Yani **boş dizin
+başlı başına "kurallar yüklenmedi" anlamına gelmez** — test ederken bunu doğrula:
+```bash
+ls ~/.config/opencode/AGENTS.md          # varsa: global kurallar kurulu
+opencode debug skill 2>&1 | grep -c '"name"'   # 38 civarı beceri + yerleşikler görünmeli
+```
+Eğer bu ikisi de boşsa/yoksa, o makinede **`kur.sh` hiç çalıştırılmamış** demektir — paket açılmış olsa
+bile kurulum adımı atlanmış olabilir; `kur.sh`'ı çalıştır.
 
 ---
 

@@ -20,7 +20,7 @@ opencode zaten OpenAI uyumlu konuşuyor; kurum ucu da OpenAI uyumlu → aradan �
 ## Aktarılamayan / açık kalanlar
 | Aider'daki özellik | Neden yok | Ne zaman gerekir |
 |---|---|---|
-| Elle 16k token bütçesi + araç şeması kırpma | opencode'un kendi bağlam yönetimi var; bizim ince ayarımız taşınmadı | Denemede bağlam taşması görülürse → TS plugin |
+| Elle 16k token bütçesi + araç şeması kırpma | Kısmen gerekti — bkz. **2026-09-15 compaction thrash** aşağıda: `task/todowrite/webfetch` araçları `opencode.json`'da deny edilerek şema küçültüldü. Kalanı (skill listesi, yerleşik sistem promptu) opencode'un kendi mekanizması/ikilisi, repo'dan kırpılamıyor. | TS plugin ile daha fazla kırpma gerekirse (ör. skill description'larını kısaltma) → `notlar/QWEN-COMPACTION-RAPOR.md`'deki açık kalanlara bak |
 | ~~Türkçe arayüz / çevirisi~~ | **KAPSAM DIŞI** — Alp (16:44): "türkçeleştirme derdim yok, aynı dilde devam edebiliriz" | ❌ kapandı, iş yok |
 | Glif/ASCII güvenliği (`guvenli()`) | opencode'un TUI'ı kendi glif setini kullanıyor | Tofu görülürse → tema/fork |
 | Yapıştırma (paste) kısayolu + CR düzeltmesi | Farklı TUI motoru | Kullanınca rahatsız ederse → bildir |
@@ -43,3 +43,11 @@ Aider'daki "beceri kütüphanesi" fikri genişletildi:
 | (yoktu) | `knowledge/runbooks/` · `incidents/` · `lessons-learned/` · `operations-notes/` |
 | (yoktu) | `knowledge/architecture/decisions/` (ADR) · `roadmap/` |
 | (yoktu) | onay kapısı: `generated/` → `experimental/` → `approved/` |
+
+## 2026-09-15 — Compaction thrash: aider'da görülmemiş yeni bir ders
+
+Aider'ın 15 fazında görülmeyen, opencode'a özgü bir bulgu: **araç çağırmayan bir model yanıtı, opencode
+1.18.30'un adım döngüsünü durdurmuyor** (yerel mock ile modelden bağımsız doğrulandı — bkz.
+`notlar/QWEN-COMPACTION-RAPOR.md`). Aider'da bu sınıfta bir sorun yaşanmamıştı çünkü aider'ın döngü
+kontrolü farklı. Ders: opencode'a geçerken "aider'da çalışıyordu" güvencesi harness-seviyesi hatalar
+için geçerli değil — her ikisi de ayrı ayrı test edilmeli.

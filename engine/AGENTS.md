@@ -25,6 +25,20 @@
 - Bağlam penceresi **16k**. Uzun dosya/log'u parça parça oku (`offset`/`limit`), tümünü birden çekme.
 - Endpoint yavaş: ilk yanıt 60–180 sn sürebilir. Panik yapma; aynı isteği üst üste yineleme.
 
+## Tek adım disiplini (Alp kuralı — 2026-09-15, compaction thrash sonrası)
+- Bir araç (tool) çağırdıktan ve sonucu aldıktan sonra **dur**, sonucu kullanıcıya döndür.
+  "Next Move / Sıradaki adım: ..." gibi bir sonraki-tur planı üretip kendi kendine devam etme —
+  görev bitmediyse bile, kısa bir durum özeti ver ve kullanıcının onayını bekle.
+- Bağlam penceresi küçük (16k): plan yazmak da, gereksiz araç çağrısı da pencereyi tüketir.
+  Emin değilsen çağırma; sor.
+
+## Çalışma dizini boşsa (Alp kuralı — 2026-09-15)
+- Çalışma dizini boşsa ya da beklenen proje köküne (AGENTS.md/README/engine/knowledge gibi işaretler)
+  rastlamıyorsan, ilk satırda bunu açıkça söyle: `Çalışma dizini boş / proje kökü bulunamadı: <yol>`.
+  Sessizce üst dizine geçme, sessizce beklemeye devam etme.
+- Kullanıcının isteği açıkça üst/komşu dizini kapsıyorsa (`external_directory` kapsamı), aynı turda
+  tek bir izin iste ve sonucu bekle — tekrar tekrar aynı isteği üretme.
+
 ## Kayıt
 - Yaptığın değişikliği tek satırda özetle (dosya + ne + neden). Sessiz değişiklik yok.
 

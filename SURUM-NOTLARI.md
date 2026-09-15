@@ -1,5 +1,25 @@
 # SÜRÜM NOTLARI — opencode ajan kiti
 
+## 2026-09-15 — Compaction thrash düzeltmesi (Vaka 1 + Vaka 2)
+
+**Ne değişti:**
+- `engine/opencode.json`: `permission.webfetch/task/todowrite = "deny"` — baseline araç şeması
+  21.1K → 13.1K karakter (ölçülen, ~%16 bağlam kazancı); `task` alt-agent'ların iç içe thrash riskini
+  kapatır, `webfetch` zaten "dış ağa veri gönderme yok" kuralıyla çelişiyordu.
+- `engine/AGENTS.md`: "Tek adım disiplini" (araç sonrası dur, plan metni üretme) ve "Çalışma dizini
+  boşsa" (sessizce döngüye girme, açıkça söyle) kuralları eklendi.
+- `NASIL-CALISTIRILIR.md`: kanıtlı kök neden (baseline ~%87 doluluk + araç-çağrısız yanıtta harness'in
+  adım döngüsünü durdurmaması), canlıda denenebilecek teşhis adımları, context ölçüm adımı, dağıtım
+  kontrolü (boş çalışma dizini ≠ kural yüklenmedi — global kurulum) eklendi.
+- Rapor: `notlar/QWEN-COMPACTION-RAPOR.md`.
+
+**Kök neden özet:** İki katmanlı. (1) 38 beceri listesi + yerleşik sistem promptu + araç şemaları,
+boş bir dizinde bile ilk istekte 16k pencerenin ~%87'sini dolduruyor (gerçek istek gövdesi ölçülerek
+doğrulandı). (2) Model araç çağırmayan bir yanıt döndürdüğünde opencode 1.18.30'un adım döngüsü
+**durmuyor** — yerel bir mock LLM ile modelden bağımsız olarak yeniden üretildi (12 saniyede 178 adım,
+üst sınır/bekleme yok). İkinci madde ikiliye gömülü bir harness hatası; repo düzeyinde düzeltilemez,
+yalnız alanı büyütüp tetiklenme ihtimalini azaltabildik.
+
 ## 2026-09-14 — Faz -1 paketi
 
 **Ne değişti:**
